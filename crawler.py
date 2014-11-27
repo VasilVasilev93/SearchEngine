@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
+import os
 
 scanned_urls = []
 titles = []
@@ -18,6 +19,12 @@ def prepare_link(url, href):
 
 
 def scan_page(url, base_url):
+    path = urlparse(url).path
+    ext = os.path.splitext(path)[1]
+
+    if ext != "":
+        return
+
     if url in scanned_urls or url in outer_links:
         return
 
