@@ -26,12 +26,10 @@ def fill_database(session, titles, scanned_urls):
         ID = session.query(Website.id).filter(Website.title == titles[0]).all()
         ID = ID[0][0]
         session.add(Page(title=titles[count], url=scanned_urls[count], website_id=ID))
-    print (ID)
+
     p_count = session.query(Page).filter(Page.website_id == ID).count()
-    print (p_count)
     session.execute(update(Website).where(Website.id == ID).values(pages_count=p_count))
     session.commit()
-    p_count = 0
 
 
 def crawl(session, websites, titles, urls):
