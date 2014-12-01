@@ -14,40 +14,62 @@ def is_outer_url(url, base_url):
     return True
 
 
+def janitor(reqest, html, soup):
+    reqest = None
+    html = None
+    soup = None
+
+
 def prepare_link(url, href):
     return urljoin(url, href)
 
 
-def scan_page(url, base_url):
+def evaluate():
+    pass
+
+
+def security():
+    pass
+
+
+def check_url(url):
     path = urlparse(url).path
     ext = os.path.splitext(path)[1]
-
     if ext != "":
-        return
+        return False
 
     if url in scanned_urls or url in outer_links:
-        return
+        return False
 
-    if "#" in url:
+    if "#" in url or "share" in url:
         outer_links.append(url)
+        return False
+    return True
+
+
+def scan_page(url, base_url):
+    if check_url(url) is True:
+
+        request = requests.get(url)
+        html = request.text
+        soup = BeautifulSoup(html)
+
+        print (url)
+
+        if soup.title:
+            if url not in scanned_urls:
+                scanned_urls.append(url)
+                titles.append(soup.title.string)
+
+            for link in soup.find_all("a"):
+                new_link = prepare_link(url, link.get("href"))
+                janitor(request, html, soup)
+                if not is_outer_url(new_link, base_url):
+                    scan_page(new_link, base_url)
+                elif is_outer_url(new_link, base_url):
+                    outer_links.append(new_link)
+                    scan_page(new_link, base_url)
+    else:
         return
-
-    r = requests.get(url)
-    html = r.text
-    soup = BeautifulSoup(html)
-
-    print (url)
-    if soup.title:
-        if url not in scanned_urls:
-            scanned_urls.append(url)
-            titles.append(soup.title.string)
-
-        for link in soup.find_all("a"):
-            new_link = prepare_link(url, link.get("href"))
-            if not is_outer_url(new_link, base_url):
-                scan_page(new_link, base_url)
-            elif is_outer_url(new_link, base_url):
-                outer_links.append(new_link)
-                scan_page(new_link, base_url)
 
     return scanned_urls
